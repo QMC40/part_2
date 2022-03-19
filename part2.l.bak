@@ -1,4 +1,3 @@
-%option noyywrap
 %{
 char buf[100];
 char *s;
@@ -92,4 +91,8 @@ char *chopper(char *subj) {
         buff[30] = '\0';
     }
     return buff;
+}
+
+int getLineNo() {
+	return lineNum;
 }

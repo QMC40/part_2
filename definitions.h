@@ -49,5 +49,6 @@
 #define EXPR 409
 #define OPERAND 410
 #define REL_OP 411
+#define ERROR 555
 
 #endif //DESCENT_PARSER_DEFINITIONS_H
