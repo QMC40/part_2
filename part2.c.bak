@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include "definitions.h"
+
+extern int yylex();
+
+int token = 0,lookAhead = 0;
+
+bool program();
+bool declarations();
+bool var_list(bool good);
+bool peek(int expected);
+void nextToken();
+
+void doTok();
+void elseTok();
+void endTok();
+void forTok();
+void ifTok();
+void then();
+void print();
+bool match(int expected);
+void error();
+bool program();
+int getToken();
+int yywrap();
+
+int main() {
+        if (parse()) {
+            printf("Compilation was unsuccessful.\n");
+        }
+        else { printf("it freakin worked!\n"); }
+    return 0;
+}
+
+//bool parse() {
+//    int tokentype;
+//    while ((tokentype = yylex())){
+//        printf("%d\n", tokentype); // Use me for debugging
+//        //printf("%d\n", tokentype);
+//    }
+//}
+ 
+bool program() {
+    nextToken();
+    if(token == PROGRAM) {
+        match(PROGRAM);
+        declarations();
+        if(token == COMMENCE) {
+            match(COMMENCE);
+           //statements();
+           if(token == END) {
+               match(END);
+               return 0;
+           }
+        }
+    }
+    return 1;
+}
+bool declarations(){
+	bool good = true;
+	while(token != COMMENCE && token){
+		good = match(token); 
+		good = var_list(1);
+		if(good) printf("valid declaration\n");
+	}
+}
+
+bool var_list(bool good) {
+	good = match(VARIABLE);
+	//should be a lookahead
+	if(good && peek(COMMA)) { good = var_list(good); }
+	good = match(SEMICOLON);
+	return good;
+}
+
+/* bool assignment(){
+	bool good = true;
+	while(token != commence) {
+		if(token == integer) { match(integer); match(left_assignment); match(number); }
+		else(token == float) { match(float); ; match(left_assignment); match(number); }
+	}
+} */
+
+void doTok() {}
+void elseTok(){}
+void endTok() {}
+void forTok() {}
+void ifTok() {}
+void then() {}
+void print() {}
+
+bool match(int expected) {
+    if(token == expected) {
+		printf("%d matched!\n",token);
+        nextToken();
+		return 1;
+    }
+    else error(token,expected);
+	return 0;
+}
+
+void error(int token,int expected) {
+	printf("failed!: token %d didn't match expected %d\n",token,expected);
+	nextToken(); // test code to advance past failed match
+	//exit(1);
+}
+
+void nextToken() {
+	if(!lookAhead) {
+		token = getToken();
+	} else {
+		token = lookAhead;
+		lookAhead = 0;
+	}
+	printf("token drawn: %d\n",token);
+}
+
+int getToken() { 
+	return yylex();
+}
+
+bool peek(int expected) {
+	lookAhead = getToken();
+	return (lookAhead == expected);
+}
+
+int yywrap() {
+    return 1;
+}
+
+

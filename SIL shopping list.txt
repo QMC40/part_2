@@ -1,0 +1,44 @@
+variable := math_expression;
+
+IF relational_expression THEN statements [ELSE statements] END IF;
+
+DO statements UNTIL relational_expression;
+
+FOR variable := start,end[,increment] statements END FOR;
+
+WHILE relational_expression BEGIN [statements] END WHILE;
+
+math_expression can be:
+
+operand binaryop operand
+
+unaryop operand
+
+operand (integer / float literal)
+
+binary ops:
++ - * / % (% is integer only)
+unary op:
+-
+
+operand can be var or num literal
+
+relational_expression: same form as binaryop w/:
+< <= > >= = <>
+
+PRINT(argument);
+	argument can be string literal or var
+
+all vars are either INTEGER or FLOAT
+all statements terminate with a ;
+variable, start, end, and increment are all integer expressions, increment is optional
+no type mixing allowed, float and int cannot mix in assignments, math_expression or
+	relational_expression
+	
+terminals:
+opators, keywords,
+
+optionals:
+increment in FOR loop (defaults to 1)
+statements in while
+
