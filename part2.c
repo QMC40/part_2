@@ -106,7 +106,7 @@ void statements() {
     int start = errCount;
     int stop = 10;                                  //DEBUG CODE!!! REMOVE BEFORE TURN IN!!!
 //    while (token != END && token) {
-    while (token != END && token != ELSE && token && stop) {         //DEBUG CODE!!! REMOVE BEFORE TURN IN!!!
+    while (token != END && token != ELSE && token != UNTIL && token && stop) {         //DEBUG CODE!!! REMOVE BEFORE TURN IN!!!
 //        printf("statement queue  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
         statement();
         stop;                                     //DEBUG CODE!!! REMOVE BEFORE TURN IN!!!
@@ -232,6 +232,8 @@ void math_expr() {
 
 void operand() {
     switch (token) {
+        case MINUS: {
+        }
         case NUMBER: {
             number();
             break;
@@ -259,7 +261,9 @@ void number() {
 
 void variable() {
     match(VARIABLE);
+//    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ variable\n");
     if (token == OPN_BRKT) {
+//        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ array\n");
         match(OPN_BRKT);
         arrayAccess();
         match(CLS_BRKT);
