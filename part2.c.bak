@@ -13,11 +13,11 @@ bool var_list(bool good);
 bool peek(int expected);
 void nextToken();
 
-void doTok();
-void elseTok();
+void do_stmt();
+void else_stmt();
 void endTok();
-void forTok();
-void ifTok();
+void for_stmt();
+void if_stmt();
 void then();
 void print();
 bool match(int expected);
@@ -83,11 +83,11 @@ bool var_list(bool good) {
 	}
 } */
 
-void doTok() {}
-void elseTok(){}
+void do_stmt() {}
+void else_stmt(){}
 void endTok() {}
-void forTok() {}
-void ifTok() {}
+void for_stmt() {}
+void if_stmt() {}
 void then() {}
 void print() {}
 

@@ -2145,7 +2145,3 @@ char *chopper(char *subj) {
     }
     return buff;
 }
-
-int getLineNo() {
-	return lineNum;
-}

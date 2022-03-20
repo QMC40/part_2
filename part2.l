@@ -1,3 +1,4 @@
+%option yylineno
 %{
 char buf[100];
 char *s;

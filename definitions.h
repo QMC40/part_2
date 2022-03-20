@@ -16,8 +16,8 @@
 #define LE_OP 110
 #define GE_OP 111
 #define EQ_OP 112
-#define OPENPAREN 201
-#define CLOSEPAREN 202
+#define OPN_PAREN 201
+#define CLS_PAREN 202
 #define SEMICOLON 203
 #define COMMA 204
 #define OPN_BRKT 205

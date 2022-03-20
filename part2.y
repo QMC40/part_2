@@ -36,8 +36,8 @@ main()
 %token GE_OP		111
 %token EQ_OP		112
 
-%token OPENPAREN 	201
-%token CLOSEPAREN	202
+%token OPN_PAREN 	201
+%token CLS_PAREN	202
 %token SEMICOLON	203
 %token COMMA		204
 %token OPN_BRKT		205
