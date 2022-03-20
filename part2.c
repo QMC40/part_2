@@ -10,7 +10,7 @@ extern int yyget_lineno();
 
 //global pass/fail flag/
 bool goodFlag = true;
-int tokenNum = 1, errCount = 0, lookAhead = 0, token;
+int tokenNum = 1, tokCount = 1, errCount = 0, lookAhead = 0, token;
 
 void parse();
 
@@ -42,8 +42,6 @@ void while_stmt();
 
 void do_stmt();
 
-void else_stmt();
-
 void variable();
 
 void expr();
@@ -51,6 +49,8 @@ void expr();
 void print();
 
 void rel_expr();
+
+void arrayAccess();
 
 void math_expr();
 
@@ -114,11 +114,12 @@ void statements() {
 }
 
 void statement() {
+    tokCount = 1;
     int start = errCount;
     char statementType[100] = {"statement type"};
     switch (token) {
         case VARIABLE: {
-            printf("assignment stmt\n");
+//            printf("assignment stmt\n");
             strcpy(statementType, "assignment statement");
             assignment();
             break;
@@ -130,7 +131,7 @@ void statement() {
             break;
         }
         case FOR: {
-            printf("for============================================================\n");
+//            printf("for============================================================\n");
             strcpy(statementType, "for loop statement");
             for_stmt();
             break;
@@ -166,14 +167,15 @@ void statement() {
         printf("invalid %s\n", statementType);
         match(SEMICOLON);
     }
-    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ switch\n");
+//    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ switch\n");
 }
 
 void assignment() {
-    match(VARIABLE);
+    variable();
     while (token == ASSIGNMENT) {
         match(ASSIGNMENT);
         expr();
+//        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ assignment\n");
     }
 }
 
@@ -181,18 +183,28 @@ void expr() {
     switch (token) {
         case VARIABLE: {
             peek();
-//            printf("lookahead: %d\n",lookAhead);
-
+//            printf("lookahead: %d\n", lookAhead);
             if (lookAhead < NE_OP && lookAhead > ASSIGNMENT) {
                 math_expr();
-            } else if (lookAhead < OPN_PAREN && lookAhead > MODULUS) {
-                rel_expr();
-            } else if (lookAhead == SEMICOLON) { match(VARIABLE);
+            } else if (lookAhead == SEMICOLON
+                       || lookAhead == ASSIGNMENT
+                       || lookAhead == COMMA
+                       || lookAhead == CLS_BRKT) {
+                variable();
             } else { errorText("invalid operator in math expression", "math or rel operator"); }
             break;
         }
         case NUMBER: {
-            number();
+            peek();
+//            printf("lookahead: %d\n", lookAhead);
+            if (lookAhead < NE_OP && lookAhead > ASSIGNMENT) {
+                math_expr();
+            } else if (lookAhead == SEMICOLON
+                       || lookAhead == ASSIGNMENT
+                       || lookAhead == COMMA
+                       || lookAhead == CLS_BRKT) {
+                number();
+            } else { errorText("invalid operator in math expression", "math or rel operator"); }
             break;
         }
         default: {
@@ -209,13 +221,13 @@ void rel_expr() {
 }
 
 void math_expr() {
-    printf("math_expr\n");
+//    printf("math_expr\n");
     operand();
     while (token < NE_OP && token > ASSIGNMENT) {
         math_op();
         operand();
     }
-    printf("end math_expr\n");
+//    printf("end math_expr\n");
 }
 
 void operand() {
@@ -225,7 +237,7 @@ void operand() {
             break;
         }
         case VARIABLE: {
-            match(VARIABLE);
+            variable();
             break;
         }
         default: {
@@ -236,12 +248,29 @@ void operand() {
 
 void number() {
     if (token == NUMBER) {
-        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ number\n");
+//        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ number\n");
         match(NUMBER);
     } else {
-        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ minus\n");
+//        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ minus\n");
         match(MINUS);
         match(NUMBER);
+    }
+}
+
+void variable() {
+    match(VARIABLE);
+    if (token == OPN_BRKT) {
+        match(OPN_BRKT);
+        arrayAccess();
+        match(CLS_BRKT);
+    }
+}
+
+void arrayAccess() {
+    expr();
+    while (token == COMMA && goodFlag) {
+        match(COMMA);
+        arrayAccess();
     }
 }
 
@@ -306,12 +335,14 @@ void math_op() {
 }
 
 void declarations() {
-    int start = errCount;
     bool empty = true;
     //take in var declarations till token comes back as my SIL 'BEGIN' token
     while (token != COMMENCE && token != 0) {
+        tokCount = 1;
+        int start = errCount;
         type();
         var_list();
+        errorClear();
         match(SEMICOLON); //203
         empty = false;
         if (start == errCount) { printf("valid declaration\n"); }
@@ -320,7 +351,12 @@ void declarations() {
     if (empty) { printf("no valid declarations\n"); }
 }
 
-void do_stmt() {}
+void do_stmt() {
+    match(DO);
+    statements();
+    match(UNTIL);
+    rel_expr();
+}
 
 void while_stmt() {
     match(WHILE);
@@ -333,12 +369,16 @@ void while_stmt() {
 
 void for_stmt() {
     match(FOR);
+//    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ start\n");
     assignment();
+//    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ comma\n");
     match(COMMA);
     number();
+//    printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ end\n");
     if (token == COMMA) {
         match(COMMA);
         number();
+//        printf("here+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ incr\n");
     }
     statements();
     match(END);
@@ -363,7 +403,7 @@ void if_stmt() {
 void print() {
     match(PRINT);
     match(OPN_PAREN);
-    if (token == VARIABLE) { match(VARIABLE); }
+    if (token == VARIABLE) { variable(); }
     else { match(STRING_LIT); }
     match(CLS_PAREN);
 }
@@ -387,82 +427,59 @@ void type() {
 
 void var_list() {
     //strip var, see what's next
-    do {
-        switch (token) {
-            case VARIABLE: {
-                match(VARIABLE);
-                break;
-            }
-            case COMMA: {
-                match(COMMA);
-                var_list();
-                break;
-            }
-            case OPN_BRKT: {
-                match(OPN_BRKT);
-                arrayDec();
-                break;
-            }
-            default: {
-                errorText("var_list", "?");
-            }
+    switch (token) {
+        case COMMA: {
+            match(COMMA);
+            variable();
+            var_list();
         }
-    } while (token != SEMICOLON && token != 0);
+        case OPN_BRKT: {
+            match(OPN_BRKT);
+            arrayDec();
+            match(CLS_BRKT);
+        }
+        default: {
+        }
+    }
 }
 
 void arrayDec() {
-    do {
-        switch (token) {
-            case NUMBER: {
-                number();
-                break;
-            }
-            case COMMA: {
-                match(COMMA);
-                break;
-            }
-            default: {
-                errorText("arrayDec", "?");
-            }
-        }
-    } while (token != CLS_BRKT && token != 0);
-    match(CLS_BRKT);
+    match(NUMBER);
+    while (token == COMMA && goodFlag) {
+        match(COMMA);
+        arrayDec();
+    }
 }
 
 //matches terminals and draws next token or calls error on fail. returns bool if needed but can be ignored
 bool match(int expected) {
     if (token == expected) {
-        printf("token %d : %d matched!\n", tokenNum, token);
-        tokenNum++;
+//        printf("token %d : %d matched!\n", tokenNum, token);
+        tokenNum++, tokCount++;
         nextToken();
         return true;
     } else error(token, expected);
     return false;
 }
 
-//prints error of mismatched token and increments error count
 void error(int tok, int expected) {
-    //print error message incr error count, reset
-    printf("line %d failed!: token %d didn't match expected %d\n", yyget_lineno(), tok, expected);
+    //print error message increment error count, set goodFlag to false / bad
+    printf("line %d token %d failed!: token %d didn't match expected %d\n", yyget_lineno(), tokCount, tok, expected);
     errCount++;
-    goodFlag = true;
-    nextToken(); // test code to advance past failed match
-    //exit(1);
+    goodFlag = false;
 }
 
 void errorText(char *subj, char *expected) {
-    //print error message incr error count, reset
-    printf("line %d failed!: %s expected %s got token %d\n", yyget_lineno(), subj, expected, token);
+    //print error message increment error count, set goodFlag to false / bad
+    printf("line %d token %d failed!: %s expected %s got token %d\n", yyget_lineno(), tokCount, subj, expected, token);
     errCount++;
-    goodFlag = true;
-    nextToken(); // test code to advance past failed match
-    //exit(1);
+    goodFlag = false;
 }
 
 //voids tokens in current statement(s) till reaching a semicolon or end of the source code
 void errorClear() {
     while (token != SEMICOLON && token != END && token != 0) {
-        printf("burned token %d\n", token);
+//        printf("burned token +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++%d\n", token);
         nextToken();
     }
 }
@@ -475,7 +492,7 @@ void nextToken() {
         token = lookAhead;
         lookAhead = 0;
     }
-    printf("token drawn: %d\n", token);
+//    printf("token drawn: %d\n", token);
 }
 
 int getToken() {
